@@ -1,34 +1,41 @@
-let playerWinCount = 0
-let computerWinCount = 0;
+let playerWinCount;
+let computerWinCount;
 
-const roundOutcome = document.getElementById('roundText');
-const gameScore = document.getElementById('scoreText');
-const gameOutcome = document.getElementById('gameText');
-
+const roundOutcome = document.getElementById('round-text');
+const gameScore = document.getElementById('score-text');
 const buttons = document.querySelectorAll('button');
-buttons.forEach((button) => {
-    if (button.id=='rock' || button.id=='paper' || button.id=='scissors') {
-        button.addEventListener('click', function () {
-            //This is an anonymous function. Because it was called as part of the addEventListener method, if I list any arguments, it will get the event object passed in as the first argument. I can call this argument whatever I like (e.g. 'myEvent', or 'bananas'). I don't need the event object, just the button.id, so no arguments are named in the anonymous function.
-            playRound(button.id);
-            //The button id could instead by found by passing in the event object as an argument (e.g. as myEvent), and then finding the button id with myEvent.target.id
-        });
-        //An alternative syntax here is...
-        //button.addEventListener('click', () => getPlayerChoice(button.id));
-        //If I needed the event object as well, it would instead be...
-        //button.addEventListener('click', myEvent => getPlayerChoice(myEvent, button.id));
-    };
-});
+const resetButton = document.getElementById('reset-button');
+
+setUpGame();
+
+function setUpGame() {
+    playerWinCount = 0
+    computerWinCount = 0;
+    roundOutcome.textContent=`Start by selecting one of the options above. First to 5 wins.`;
+    gameScore.textContent=`Current score: ${playerWinCount} : ${computerWinCount}`;
+    resetButton.classList.add('hidden-button');
+    resetButton.removeEventListener('click', setUpGame);
+    buttons.forEach((button) => {
+        if (button.id=='Rock' || button.id=='Paper' || button.id=='Scissors') {
+            button.addEventListener('click', handleClick);
+            button.classList.remove('disabled-button');
+        };
+    });
+};
+
+function handleClick(event) {
+    playRound(event.target.id)
+};
 
 function getComputerChoice() {
     let computerChoice;
     let randomNumber = Math.random() * 3;
     if (randomNumber <=1) {
-        computerChoice = "rock";
+        computerChoice = "Rock";
     } else if (randomNumber <=2) {
-        computerChoice = "paper";
+        computerChoice = "Paper";
     } else {
-        computerChoice = "scissors";
+        computerChoice = "Scissors";
     }
     return computerChoice;
 };
@@ -37,23 +44,23 @@ function playRound(playerSelection) {
     const computerSelection = getComputerChoice();
     let roundResult;
     if (playerSelection == computerSelection) {
-        roundResult = "tie";
-    } else if ( playerSelection == "rock" && computerSelection == "scissors" ||
-                playerSelection == "scissors" && computerSelection == "paper" ||
-                playerSelection == "paper" && computerSelection == "rock") {
-        roundResult = "playerWin";
+        roundResult = "Tie";
+    } else if ( playerSelection == "Rock" && computerSelection == "Scissors" ||
+                playerSelection == "Scissors" && computerSelection == "Paper" ||
+                playerSelection == "Paper" && computerSelection == "Rock") {
+        roundResult = "Player Wins";
         playerWinCount++;
     } else {
-        roundResult = "computerWin";
+        roundResult = "Computer Wins";
         computerWinCount++;
     }
     console.log(`Player: ${playerSelection}, Computer: ${computerSelection}, Result: ${roundResult}`);
     console.log(`Current score: ${playerWinCount}:${computerWinCount}`);
 
     roundOutcome.textContent=(
-        `Player: ${playerSelection}, Computer: ${computerSelection}, Result: ${roundResult}`
+        `Last round: (Player) ${playerSelection} vs. ${computerSelection} (Computer). Result: ${roundResult}.`
     );
-    gameScore.textContent=(`Current score: ${playerWinCount}:${computerWinCount}`);
+    gameScore.textContent=(`Current score: ${playerWinCount} : ${computerWinCount}`);
     if (playerWinCount >= 5 || computerWinCount >=5) {
         endGame();
     };
@@ -62,10 +69,19 @@ function playRound(playerSelection) {
 function endGame(){
     let winner;
     if (playerWinCount > computerWinCount) {
-        winner = prompt("You've won! Enter your name");
+        winner = prompt("You've won! Enter your name below.");
+        if (winner == null) winner = "you";
     } else {
         winner = "Computer";
     }
-    gameScore.textContent=(`Final score: ${playerWinCount}:${computerWinCount}`);
-    gameOutcome.textContent=(`Game over! Winner is ${winner}.`);
+    gameScore.textContent=(
+        `Game over! The final score is ${playerWinCount} : ${computerWinCount}. Congratulations ${winner}!`);
+    resetButton.classList.remove('hidden-button');
+    resetButton.addEventListener('click', setUpGame);
+    buttons.forEach((button) => {
+        if (button.id=='Rock' || button.id=='Paper' || button.id=='Scissors') {
+            button.removeEventListener('click', handleClick);
+            button.classList.add("disabled-button");
+        };
+    });
 };
